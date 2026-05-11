@@ -1,0 +1,89 @@
+{
+  "manifest_version": 2,
+  "name": "LPU AutoConnect",
+  "version": "1.0.0",
+  "description": "Automatically connects to LPU WiFi captive portal (24Online/Cyberoam). Silent background login with smart reconnect.",
+  "author": "LPU AutoConnect",
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "lpu-autoconnect@extension",
+      "strict_min_version": "91.0"
+    }
+  },
+
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+
+  "permissions": [
+    "storage",
+    "tabs",
+    "alarms",
+    "notifications",
+    "webNavigation",
+    "webRequest",
+    "http://172.16.0.30/*",
+    "http://172.16.68.6/*",
+    "http://172.16.68.46/*",
+    "http://phc.lpu.in/*",
+    "http://10.10.0.1/*",
+    "https://internet.lpu.in/*",
+    "http://internet.lpu.in/*",
+    "http://1.1.1.1/*",
+    "http://connectivitycheck.gstatic.com/*",
+    "http://clients3.google.com/*",
+    "http://www.msftconnecttest.com/*",
+    "http://captive.apple.com/*",
+    "http://detectportal.firefox.com/*",
+    "<all_urls>"
+  ],
+
+  "background": {
+    "scripts": [
+      "src/shared/constants.js",
+      "src/shared/utils.js",
+      "src/background/service-worker.js"
+    ],
+    "persistent": false
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "http://172.16.0.30/*",
+        "http://172.16.68.6/*",
+        "http://172.16.68.46/*",
+        "http://phc.lpu.in/*",
+        "http://10.10.0.1/*",
+        "https://internet.lpu.in/*",
+        "http://internet.lpu.in/*"
+      ],
+      "js": ["src/content/portal-injector.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+
+  "browser_action": {
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png"
+    },
+    "default_title": "LPU AutoConnect"
+  },
+
+  "options_ui": {
+    "page": "src/options/options.html",
+    "open_in_tab": true
+  },
+
+  "web_accessible_resources": [
+    "icons/*"
+  ]
+}
