@@ -25,19 +25,15 @@ const PORTAL_URLS = [
   'http://10.10.0.1',
 ];
 
-// URL patterns used to identify if a page is a captive portal login
-const PORTAL_URL_PATTERNS = [
+// Hosts that are allowed to receive the saved credentials.
+// Must match the content_scripts "matches" list in the manifests.
+const PORTAL_HOSTS = [
   'internet.lpu.in',
   '172.16.0.30',
   '172.16.68.6',
   '172.16.68.46',
   'phc.lpu.in',
   '10.10.0.1',
-  '24online',
-  'cyberoam',
-  'httpdClient',
-  'userportal',
-  'captiveportal',
 ];
 
 // URL patterns that indicate a POST-LOGIN page (success/status page).

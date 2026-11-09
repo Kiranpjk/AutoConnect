@@ -507,6 +507,11 @@ async function handleMessage(message, sender) {
     // ─── From Content Script ──────────────────────────────
     case MSG.PORTAL_READY: {
       log('BG', 'Portal ready on tab ' + (sender.tab ? sender.tab.id : '?'));
+      // Only a frame on a known portal host may receive the password
+      if (!isPortalURL(sender.url)) {
+        logError('BG', 'Refused credentials for non-portal page: ' + sender.url);
+        return { ok: false };
+      }
       // Send credentials to content script
       var creds = await storageGet({
         [STORAGE_KEYS.USERNAME]: '',
@@ -592,6 +597,10 @@ async function handleMessage(message, sender) {
     }
 
     case MSG.GET_CREDENTIALS: {
+      // Only the extension's own pages (settings, popup) may read saved credentials
+      if (String(sender.url || '').indexOf(chrome.runtime.getURL('')) !== 0) {
+        return { ok: false };
+      }
       var savedCreds = await storageGet({
         [STORAGE_KEYS.USERNAME]: '',
         [STORAGE_KEYS.PASSWORD]: '',
