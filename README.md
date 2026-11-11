@@ -18,6 +18,7 @@
 - **Passive + Active Detection** — Monitors `webNavigation` and `webRequest` events alongside active fetch-based checks
 - **Minimal UI** — Clean dark popup showing connection status, last login time, and reconnect button
 - **Local Credential Storage** — Credentials stored in browser local storage, never transmitted externally
+- **Host-Locked Autofill** — Credentials are only filled in on the exact portal hosts listed in `src/shared/constants.js` (checked by `node test/portal-url.test.js`)
 
 ---
 

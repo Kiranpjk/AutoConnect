@@ -41,9 +41,15 @@ function sanitizeUsername(raw) {
  * @returns {boolean}
  */
 function isPortalURL(url) {
-  if (!url) return false;
-  var lower = url.toLowerCase();
-  return PORTAL_URL_PATTERNS.some(function(pattern) { return lower.includes(pattern); });
+  // Match the exact host, never a substring: "https://evil.example/?captiveportal"
+  // must not count as the portal, or the password would be filled in there.
+  try {
+    var parsed = new URL(url);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
+    return PORTAL_HOSTS.indexOf(parsed.hostname) !== -1;
+  } catch (e) {
+    return false;
+  }
 }
 
 /**
