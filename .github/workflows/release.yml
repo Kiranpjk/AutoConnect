@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Check tag matches manifest version
+        run: |
+          version=$(node -p "require('./manifest_chrome.json').version")
+          ff=$(node -p "require('./manifest_firefox.json').version")
+          if [ "v$version" != "$GITHUB_REF_NAME" ] || [ "$version" != "$ff" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match manifest versions (chrome $version, firefox $ff)"
+            exit 1
+          fi
+      - run: npm run build
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.zip
+          generate_release_notes: true
