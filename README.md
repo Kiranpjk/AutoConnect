@@ -1,8 +1,10 @@
 # AutoConnect
 
+[![CI](https://github.com/Kiranpjk/autoconnect/actions/workflows/ci.yml/badge.svg)](https://github.com/Kiranpjk/autoconnect/actions/workflows/ci.yml)
+
 > Automatically logs into LPU WiFi captive portal (24Online/Cyberoam) whenever internet access is blocked.
 
-**Manifest V3** · **Vanilla JavaScript** · **Chrome/Edge/Firefox** · **Zero Dependencies**
+**Manifest V3 (Chrome/Edge)** · **Manifest V2 (Firefox)** · **Vanilla JavaScript** · **No runtime dependencies**
 
 ---
 
@@ -18,7 +20,7 @@
 - **Passive + Active Detection** — Monitors `webNavigation` and `webRequest` events alongside active fetch-based checks
 - **Minimal UI** — Clean dark popup showing connection status, last login time, and reconnect button
 - **Local Credential Storage** — Credentials stored in browser local storage, never transmitted externally
-- **Host-Locked Autofill** — Credentials are only filled in on the exact portal hosts listed in `src/shared/constants.js` (checked by `node test/portal-url.test.js`)
+- **Host-Locked Autofill** — Credentials are only filled in on the exact portal hosts listed in `src/shared/constants.js` (checked by `npm test`)
 
 ---
 
@@ -55,36 +57,35 @@ lpu-autoconnect/
 
 ## Installation
 
-### Chrome / Edge
+### From a release (recommended)
 
-1. Open `chrome://extensions` (or `edge://extensions`)
-2. Enable **Developer mode** (toggle in top-right)
-3. Click **"Load unpacked"**
-4. Select the project root folder (the folder containing `manifest.json`)
-5. The extension icon will appear in the toolbar
-6. Click the icon → click **Settings** → enter your registration number and password
+Each tagged release on the [Releases page](https://github.com/Kiranpjk/autoconnect/releases) has two zips:
+`autoconnect-chrome-<version>.zip` and `autoconnect-firefox-<version>.zip`.
 
-### Firefox
+**Chrome / Edge**
 
-> Firefox MV3 support requires some minor adjustments. The extension is designed to be compatible but Firefox may need the `browser_specific_settings` key in manifest.json.
+1. Unzip `autoconnect-chrome-<version>.zip` into a folder
+2. Open `chrome://extensions` (or `edge://extensions`) and enable **Developer mode**
+3. Click **Load unpacked** and select the unzipped folder
+4. Click the extension icon → **Settings** → enter your registration number and password
+
+**Firefox**
 
 1. Open `about:debugging#/runtime/this-firefox`
-2. Click **"Load Temporary Add-on"**
-3. Select `manifest.json` from the project folder
-4. Configure credentials via the settings page
+2. Click **Load Temporary Add-on** and pick `autoconnect-firefox-<version>.zip`
+   (temporary add-ons are removed when Firefox restarts; the add-on is not signed by Mozilla)
+3. Configure credentials via the settings page
 
-#### Firefox Compatibility Note
+### From source
 
-For persistent Firefox installation, you may need to add to `manifest.json`:
-
-```json
-"browser_specific_settings": {
-  "gecko": {
-    "id": "lpu-autoconnect@extension",
-    "strict_min_version": "109.0"
-  }
-}
+```bash
+npm ci
+npm run build      # creates dist/chrome/, dist/firefox/ and a zip for each
 ```
+
+Load `dist/chrome` (Chrome/Edge, MV3) or `dist/firefox/manifest.json` (Firefox, MV2) as described above.
+The root `manifest.json` is a copy of `manifest_chrome.json`, so the repo root can also be loaded
+unpacked in Chrome directly; `./switch-browser.sh firefox` swaps it to the Firefox manifest.
 
 ---
 
@@ -230,12 +231,48 @@ Edit `PORTAL_URLS` and `PORTAL_URL_PATTERNS` in `src/shared/constants.js` and ad
 
 ---
 
-## Security Notes
+## Privacy & Security
 
-- Credentials are stored in `chrome.storage.local` — **encrypted at rest** by the browser
-- Credentials are **never** sent to any external server
-- Only transmitted to the local captive portal page via content script injection
-- The extension only accesses known LPU portal IPs and standard connectivity check endpoints
+Verified against the code in `src/`:
+
+- Your registration number and password are saved only in the browser's extension storage
+  (`chrome.storage.local` / `browser.storage.local`) on your machine. Nothing is synced or
+  uploaded. Note that this storage is **not encrypted** by the extension; anyone with access
+  to your browser profile can read it.
+- The only network requests the extension makes itself are body-less `HEAD` requests to the
+  public connectivity-check URLs listed in `CONNECTIVITY_CHECK_URLS` (Google, Microsoft,
+  Mozilla, Apple). They carry no credentials (`checkConnectivity` in `src/shared/utils.js`;
+  a unit test asserts the requests are `HEAD` with no body).
+- The background script hands the credentials to a page only if the requesting frame's URL
+  is on one of the exact hosts in `PORTAL_HOSTS` (`isPortalURL`). The content script then
+  fills the portal's login form, and the portal receives them when the form is submitted.
+- No analytics, telemetry or third-party scripts. The Firefox manifest declares
+  `data_collection_permissions: none`.
+
+---
+
+## Testing & CI/CD
+
+```bash
+npm ci
+npm run lint          # ESLint
+npm test              # node:test unit tests for src/shared (no browser needed)
+npm run build         # dist/ folders + zips for Chrome and Firefox
+npm run lint:firefox  # Mozilla's web-ext lint on dist/firefox (run after build)
+```
+
+- **CI** (`.github/workflows/ci.yml`): on every push to `main` and every pull request it runs
+  ESLint, the unit tests, builds both packages, runs `web-ext lint` on the Firefox build and
+  uploads the zips as a workflow artifact.
+- **Release** (`.github/workflows/release.yml`): pushing a tag like `v1.0.1` runs the tests,
+  checks that the tag matches the `version` in both manifests, builds both zips and attaches
+  them to a GitHub Release.
+
+  ```bash
+  # bump "version" in manifest_chrome.json, manifest_firefox.json and manifest.json first
+  git tag v1.0.1 && git push origin v1.0.1
+  ```
+- **Dependabot** keeps npm dev dependencies and GitHub Actions up to date.
 
 ---
 
