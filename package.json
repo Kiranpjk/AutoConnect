@@ -11,7 +11,7 @@
     "build": "bash scripts/build.sh"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.5",
+    "@eslint/js": "^10.0.1",
     "eslint": "^9.39.5",
     "globals": "^17.14.0",
     "web-ext": "^10.8.0"
