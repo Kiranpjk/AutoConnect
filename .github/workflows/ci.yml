@@ -24,7 +24,7 @@ jobs:
         run: npm run build
       - name: Lint Firefox package (web-ext)
         run: npm run lint:firefox
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: extension-zips
           path: dist/*.zip
