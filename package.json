@@ -1,0 +1,19 @@
+{
+  "name": "lpu-autoconnect",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Browser extension that logs into the LPU WiFi captive portal automatically",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test \"test/**/*.test.js\"",
+    "lint": "eslint .",
+    "lint:firefox": "web-ext lint --source-dir dist/firefox",
+    "build": "bash scripts/build.sh"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "globals": "^17.14.0",
+    "web-ext": "^10.8.0"
+  }
+}

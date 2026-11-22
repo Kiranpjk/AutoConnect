@@ -390,8 +390,8 @@
       }
 
       // Check if already logged in (page shows logout button or success text)
-      var bodyText = (document.body && document.body.innerText || '').toLowerCase();
-      if (bodyText.includes('you are already logged in') || bodyText.includes('already logged')) {
+      var pageText = (document.body && document.body.innerText || '').toLowerCase();
+      if (pageText.includes('you are already logged in') || pageText.includes('already logged')) {
         console.log(PREFIX, 'Already logged in detected');
         reportSuccess();
         return;
